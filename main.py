@@ -36,8 +36,6 @@ parser.add_argument('--home_path', default=home_dir, type=str,
                     help='Project home directory')
 args = parser.parse_args()
 
-
-
 device = torch.device(args.device)
 experiment_description = args.experiment_description
 data_type = args.selected_dataset
@@ -78,8 +76,8 @@ logger.debug(f'Mode:    {training_mode}')
 logger.debug("=" * 45)
 
 # Load datasets
-data_path = f"./data/{data_type}"
-train_dl, valid_dl, test_dl = data_generator(data_path, configs, training_mode)
+data_path = f"data/{data_type}"
+train_dl, valid_dl, test_dl = data_generator(args, data_path, configs, training_mode)
 logger.debug("Data loaded ...")
 
 # Load Model
@@ -133,8 +131,6 @@ if training_mode == "random_init":
             if j in i:
                 del model_dict[i]
     set_requires_grad(model, model_dict, requires_grad=False)  # Freeze everything except last layer.
-
-
 
 model_optimizer = torch.optim.Adam(model.parameters(), lr=configs.lr, betas=(configs.beta1, configs.beta2), weight_decay=3e-4)
 temporal_contr_optimizer = torch.optim.Adam(temporal_contr_model.parameters(), lr=configs.lr, betas=(configs.beta1, configs.beta2), weight_decay=3e-4)

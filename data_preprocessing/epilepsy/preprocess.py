@@ -25,9 +25,9 @@ X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_
 dat_dict = dict()
 dat_dict["samples"] = torch.from_numpy(X_train).unsqueeze(1)
 dat_dict["labels"] = torch.from_numpy(y_train)
-torch.save(dat_dict, "train.pt")
+torch.save(dat_dict, "../../data/Epilepsy/train.pt")
 
 dat_dict = dict()
 dat_dict["samples"] = torch.from_numpy(X_test).unsqueeze(1)
 dat_dict["labels"] = torch.from_numpy(y_test)
-torch.save(dat_dict, "test.pt")
+torch.save(dat_dict, "../../data/Epilepsy/test.pt")

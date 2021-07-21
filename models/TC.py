@@ -4,7 +4,6 @@ import numpy as np
 from .attention import Seq_Transformer
 
 
-
 class TC(nn.Module):
     def __init__(self, configs, device):
         super(TC, self).__init__()

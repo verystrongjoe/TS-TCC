@@ -28,6 +28,14 @@ class NTXentLoss(torch.nn.Module):
         mask = (1 - mask).type(torch.bool)
         return mask.to(self.device)
 
+    def _get_correlated_mask_size(self, size):
+        diag = np.eye(2 * size)
+        l1 = np.eye((2 * size), 2 * size, k=-size)
+        l2 = np.eye((2 * size), 2 * size, k=size)
+        mask = torch.from_numpy((diag + l1 + l2))
+        mask = (1 - mask).type(torch.bool)
+        return mask.to(self.device)
+
     @staticmethod
     def _dot_simililarity(x, y):
         v = torch.tensordot(x.unsqueeze(1), y.T.unsqueeze(0), dims=2)
@@ -44,16 +52,22 @@ class NTXentLoss(torch.nn.Module):
         return v
 
     def forward(self, zis, zjs):
+        current_batch = zjs.shape[0]
         representations = torch.cat([zjs, zis], dim=0)
 
         similarity_matrix = self.similarity_function(representations, representations)
 
         # filter out the scores from the positive samples
-        l_pos = torch.diag(similarity_matrix, self.batch_size)
-        r_pos = torch.diag(similarity_matrix, -self.batch_size)
-        positives = torch.cat([l_pos, r_pos]).view(2 * self.batch_size, 1)
+        # l_pos = torch.diag(similarity_matrix, self.batch_size)
+        # r_pos = torch.diag(similarity_matrix, -self.batch_size)
+        # positives = torch.cat([l_pos, r_pos]).view(2 * self.batch_size, 1)
+        # negatives = similarity_matrix[self.mask_samples_from_same_repr].view(2 * self.batch_size, -1)
 
-        negatives = similarity_matrix[self.mask_samples_from_same_repr].view(2 * self.batch_size, -1)
+        # filter out the scores from the positive samples
+        l_pos = torch.diag(similarity_matrix, current_batch)
+        r_pos = torch.diag(similarity_matrix, -current_batch)
+        positives = torch.cat([l_pos, r_pos]).view(2 * current_batch, 1)
+        negatives = similarity_matrix[self.mask_samples_from_same_repr].view(2 * current_batch, -1)
 
         logits = torch.cat((positives, negatives), dim=1)
         logits /= self.temperature
@@ -61,4 +75,5 @@ class NTXentLoss(torch.nn.Module):
         labels = torch.zeros(2 * self.batch_size).to(self.device).long()
         loss = self.criterion(logits, labels)
 
-        return loss / (2 * self.batch_size)
+        # return loss / (2 * self.batch_size)
+        return loss / (2 * current_batch)

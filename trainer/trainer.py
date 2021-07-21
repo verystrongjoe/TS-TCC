@@ -11,7 +11,6 @@ import torch.nn.functional as F
 from models.loss import NTXentLoss
 
 
-
 def Trainer(model, temporal_contr_model, model_optimizer, temp_cont_optimizer, train_dl, valid_dl, test_dl, device, logger, config, experiment_log_dir, training_mode):
     # Start training
     logger.debug("Training started ....")
@@ -84,9 +83,9 @@ def model_train(model, temporal_contr_model, model_optimizer, temp_cont_optimize
                                            config.Context_Cont.use_cosine_similarity)
             loss = (temp_cont_loss1 + temp_cont_loss2) * lambda1 +  nt_xent_criterion(zis, zjs) * lambda2
             
-        else: # supervised training or fine tuining
+        else:  # supervised training or fine tuining
             predictions, features = output
-            loss = criterion(predictions, target)
+            loss = criterion(predictions, target.reshape(128,))
             total_acc.append(target.eq(predictions.detach().argmax(dim=1)).float().mean())
 
         total_loss.append(loss.item())
@@ -126,7 +125,7 @@ def model_evaluate(model, temporal_contr_model, test_dl, device, training_mode):
             # compute loss
             if training_mode != "self_supervised":
                 predictions, features = output
-                loss = criterion(predictions, target)
+                loss = criterion(predictions, target.reshape(128,))
                 total_acc.append(target.eq(predictions.detach().argmax(dim=1)).float().mean())
                 total_loss.append(loss.item())
 

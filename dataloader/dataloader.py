@@ -42,15 +42,41 @@ class Load_Dataset(Dataset):
         return self.len
 
 
-def data_generator(data_path, configs, training_mode):
+def data_generator(args, data_path, configs, training_mode):
 
-    train_dataset = torch.load(os.path.join(data_path, "train.pt"))
-    valid_dataset = torch.load(os.path.join(data_path, "val.pt"))
-    test_dataset = torch.load(os.path.join(data_path, "test.pt"))
+    if 'StandWalkJump' in data_path or 'LSST' in data_path:
+        device = torch.device(args.device)
+        path = 'data/LSST/'
+        x_train = np.load(path + 'X_train.npy')
+        y_train = np.load(path + 'y_train.npy')
+        x_test = np.load(path + 'X_test.npy')
+        y_test = np.load(path + 'y_test.npy')
 
-    train_dataset = Load_Dataset(train_dataset, configs, training_mode)
-    valid_dataset = Load_Dataset(valid_dataset, configs, training_mode)
-    test_dataset = Load_Dataset(test_dataset, configs, training_mode)
+        x_train = x_train.swapaxes(1,2)
+        x_test = x_test.swapaxes(1,2)
+
+        train_dataset, valid_dataset, test_dataset = {}, {}, {}
+        train_dataset['samples'] = torch.as_tensor(x_train, dtype=torch.float32)
+        train_dataset['labels'] = torch.as_tensor(y_train, dtype=torch.float32)
+
+        valid_dataset['samples'] = torch.as_tensor(x_test, dtype=torch.float32)
+        valid_dataset['labels'] = torch.as_tensor(y_test, dtype=torch.float32)
+
+        test_dataset['samples'] = torch.as_tensor(x_test, dtype=torch.float32)
+        test_dataset['labels'] = torch.as_tensor(y_test, dtype=torch.float32)
+
+        train_dataset = Load_Dataset(train_dataset, configs, training_mode)
+        valid_dataset = Load_Dataset(valid_dataset, configs, training_mode)
+        test_dataset = Load_Dataset(test_dataset, configs, training_mode)
+
+    else:
+        train_dataset = torch.load(os.path.join(data_path, "train.pt"))  # (9200, 1, 178)
+        valid_dataset = torch.load(os.path.join(data_path, "train.pt"))  # val.pt
+        test_dataset = torch.load(os.path.join(data_path, "test.pt"))
+
+        train_dataset = Load_Dataset(train_dataset, configs, training_mode)
+        valid_dataset = Load_Dataset(valid_dataset, configs, training_mode)
+        test_dataset = Load_Dataset(test_dataset, configs, training_mode)
 
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=configs.batch_size,
                                                shuffle=True, drop_last=configs.drop_last,
@@ -60,7 +86,7 @@ def data_generator(data_path, configs, training_mode):
                                                num_workers=0)
 
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=configs.batch_size,
-                                              shuffle=False, drop_last=False,
+                                              shuffle=False, drop_last=configs.drop_last,
                                               num_workers=0)
 
     return train_loader, valid_loader, test_loader
