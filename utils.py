@@ -7,6 +7,8 @@ import sys
 import logging
 from sklearn.metrics import classification_report, cohen_kappa_score, confusion_matrix, accuracy_score
 from shutil import copy
+import wandb
+
 
 def set_requires_grad(model, dict_, requires_grad=True):
     for param in model.named_parameters():
@@ -43,7 +45,14 @@ def _calc_metrics(pred_labels, true_labels, log_dir, home_path):
     cm = confusion_matrix(true_labels, pred_labels)
     df = pd.DataFrame(r)
     df["cohen"] = cohen_kappa_score(true_labels, pred_labels)
-    df["accuracy"] = accuracy_score(true_labels, pred_labels)
+    accuracy = accuracy_score(true_labels, pred_labels)
+    df["accuracy"] = accuracy
+
+    # wandb for result
+    # wandb.sklearn.plot_roc(true_labels, pred_labels)
+    wandb.sklearn.plot_confusion_matrix(true_labels, pred_labels)
+    wandb.run.summary.update({"accuracy": str(accuracy)})
+
     df = df * 100
 
     # save classification report
@@ -80,17 +89,15 @@ def _logger(logger_name, level=logging.DEBUG):
     return logger
 
 
-
-
-
 def copy_Files(destination, data_type):
     destination_dir = os.path.join(destination, "model_files")
-    os.makedirs(destination_dir, exist_ok=True)
-    copy("main.py", os.path.join(destination_dir, "main.py"))
-    copy("trainer/trainer.py", os.path.join(destination_dir, "trainer.py"))
-    copy(f"config_files/{data_type}_Configs.py", os.path.join(destination_dir, f"{data_type}_Configs.py"))
-    copy("dataloader/augmentations.py", os.path.join(destination_dir, "augmentations.py"))
-    copy("dataloader/dataloader.py", os.path.join(destination_dir, "dataloader.py"))
-    copy(f"models/model.py", os.path.join(destination_dir, f"model.py"))
-    copy("models/loss.py", os.path.join(destination_dir, "loss.py"))
-    copy("models/TC.py", os.path.join(destination_dir, "TC.py"))
+    # todo : currenly block copying file codes
+    # os.makedirs(destination_dir, exist_ok=True)
+    # copy("main.py", os.path.join(destination_dir, "main.py"))
+    # copy("trainer/trainer.py", os.path.join(destination_dir, "trainer.py"))
+    # copy(f"config_files/{data_type}_Configs.py", os.path.join(destination_dir, f"{data_type}_Configs.py"))
+    # copy("dataloader/augmentations.py", os.path.join(destination_dir, "augmentations.py"))
+    # copy("dataloader/dataloader.py", os.path.join(destination_dir, "dataloader.py"))
+    # copy(f"models/model.py", os.path.join(destination_dir, f"model.py"))
+    # copy("models/loss.py", os.path.join(destination_dir, "loss.py"))
+    # copy("models/TC.py", os.path.join(destination_dir, "TC.py"))
