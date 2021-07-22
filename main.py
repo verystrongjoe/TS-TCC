@@ -36,8 +36,10 @@ if __name__ == '__main__':
                         help='Dataset of choice: sleepEDF, HAR, Epilepsy, pFD')
     parser.add_argument('--logs_save_dir', default='experiments_logs', type=str,
                         help='saving directory')
-    parser.add_argument('--device', default='cuda', type=str,
-                        help='cpu or cuda')
+    parser.add_argument('--no-cuda', action='store_true', default=False,
+                        help='Disables CUDA training.')
+    parser.add_argument('--num_gpu', type=int, default=0,
+                        help='num of gpu to be used')
     parser.add_argument('--home_path', default=home_dir, type=str,
                         help='Project home directory')
     args = parser.parse_args()
@@ -46,7 +48,8 @@ if __name__ == '__main__':
     run = wandb.init(project=f'{args.experiment_description}', name=f"{args.selected_dataset}_{args.seed}_{args.training_mode}", reinit=True)
     wandb.config.update(args)  # adds all of the arguments as config variable
 
-    device = torch.device(args.device)
+    device = torch.device(f'cuda:{args.num_gpu}' if not args.no_cuda and torch.cuda.is_available() else 'cpu')
+
     experiment_description = args.experiment_description
     data_type = args.selected_dataset
     method = 'TS-TCC'
