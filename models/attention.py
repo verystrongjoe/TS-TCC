@@ -5,7 +5,6 @@ from einops import rearrange, repeat
 
 
 ########################################################################################
-
 class Residual(nn.Module):
     def __init__(self, fn):
         super().__init__()

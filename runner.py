@@ -4,14 +4,14 @@ if __name__ == '__main__':
 
     datasets = [
         'ArticularyWordRecognition',
-        # 'AtrialFibrilation',
-        # 'BasicMotions',
+        'AtrialFibrilation',
+        'BasicMotions',
         'CharacterTrajectories',
-        # 'Cricket',
-        # 'DuckDuckGeese',
-        # 'EigenWorms',
+        'Cricket',
+        'DuckDuckGeese',
+        'EigenWorms',
         'Epilepsy',
-        # 'ERing',
+        'ERing',
         'EthanolConcentration',
         'FaceDetection',
         'FingerMovements',
@@ -31,8 +31,8 @@ if __name__ == '__main__':
         'SelfRegulationSCP1',
         'SelfRegulationSCP2',
         'SpokenArabicDigits',
-        # 'StandWalkJump',
-        # 'UWaveGestureLibrary'
+        'StandWalkJump',
+        'UWaveGestureLibrary'
     ]
 
     # datasets = ['LSST']
